@@ -200,3 +200,34 @@ ALTER SEQUENCE public.quizzes_id_seq OWNED BY public.quizzes.id;
 ALTER SEQUENCE public.ratings_id_seq OWNED BY public.ratings.id;
 ALTER SEQUENCE public.users_id_seq OWNED BY public.users.id;
 ALTER SEQUENCE public.uservotes_id_seq OWNED BY public.uservotes.id;
+```
+
+## Development History
+- **Initial Setup**: Set up PostgreSQL database and basic Express server.
+- **Backend Development**:
+  - Resolved port 5000 conflict by switching to 3000.
+  - Fixed "Cannot GET" errors by using POST methods correctly.
+  - Handled foreign key violations and JSON parsing for quizzes.
+  - Added duration parsing for progress with CASE statements.
+- **Frontend Development**:
+  - Built the student dashboard with React, showing enrolled, newest, and top-rated courses.
+  - Added filters and recommended courses based on enrollment.
+  - Fixed 404 errors on API calls by correcting `API_URL` interpolation (resolved dual `config.js` files issue).
+- **Database Enhancements**: I added tables (`coursecontent`, `forumposts`, `quizsubmissions`, `ratings`, `uservotes`) to support frontend features like content management, forums, quiz tracking, ratings, and voting.
+- **Deployment**:
+  - Deployed backend on Render (`my-learning-server-ma48.onrender.com`).
+  - Deployed frontend on Render (`my-learning-client.onrender.com`).
+  - Resolved refresh 404s by adding a rewrite rule to serve `index.html` for all routes.
+- **Troubleshooting**:
+  - Fixed 403 errors by ensuring port availability.
+  - Addressed client-side routing issues with Render’s static site configuration.
+
+## Deployment
+- **Backend**: Deployed on Render with environment variables (`DATABASE_URL`, `JWT_SECRET`).
+- **Frontend**: Deployed on Render with a rewrite rule (`/*` to `/index.html`) to handle SPA routing.
+- **Access**: Visit `my-learning-client.onrender.com` after logging in.
+
+## Future Improvements
+- Add user-facing error messages for 404s or API failures.
+- Enhance security with specific CORS origins.
+- Implement certificate generation and download.
