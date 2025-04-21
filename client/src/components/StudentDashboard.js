@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
-
+import { API_URL } from './config';
 const StudentDashboard = () => {
   const [enrolledCourses, setEnrolledCourses] = useState([]);
   const [recommendedCourses, setRecommendedCourses] = useState([]);
@@ -22,7 +22,7 @@ const StudentDashboard = () => {
     if (token) {
       console.log('Fetching enrolled courses for userId:', userId);
       axios
-        .get(`http://localhost:3000/api/courses/enrollments?user_id=${userId}`, {
+        .get(`${API_URL}/api/courses/enrollments?user_id=${userId}`, {
           headers: { Authorization: `Bearer ${token}` },
         })
         .then((res) => {
@@ -40,7 +40,7 @@ const StudentDashboard = () => {
             const categories = [...new Set(courses.map((c) => c.category))];
             if (categories.length > 0) {
               axios
-                .get(`http://localhost:3000/api/courses/recommend-by-interest?user_id=${userId}&categories=${categories.join(',')}&limit=3`, {
+                .get(`${API_URL}/api/courses/recommend-by-interest?user_id=${userId}&categories=${categories.join(',')}&limit=3`, {
                   headers: { Authorization: `Bearer ${token}` },
                 })
                 .then((res) => {
@@ -74,7 +74,7 @@ const StudentDashboard = () => {
 
       console.log('Fetching newest courses');
       axios
-        .get('http://localhost:3000/api/courses/recent', {
+        .get('${API_URL}/api/courses/recent', {
           headers: { Authorization: `Bearer ${token}` },
         })
         .then((res) => {
@@ -98,7 +98,7 @@ const StudentDashboard = () => {
 
       console.log('Fetching top-rated courses');
       axios
-        .get('http://localhost:3000/api/courses/top-rated', {
+        .get('${API_URL}/api/courses/top-rated', {
           headers: { Authorization: `Bearer ${token}` },
         })
         .then((res) => {
