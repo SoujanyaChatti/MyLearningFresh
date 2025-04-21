@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import './InstructorDashboard.css';
+import { API_URL } from './config'; // Import the config
 
 const InstructorDashboard = () => {
   const [view, setView] = useState('myCourses'); // 'myCourses' or 'createCourse'
@@ -76,7 +77,7 @@ const InstructorDashboard = () => {
     try {
       console.log(`Fetching courses for instructor ID: ${tokenId} with token: ${token.substring(0, 10)}...`);
       
-      const response = await axios.get(`http://localhost:3000/api/courses/instructor/${tokenId}`, {
+    const response = await axios.get(`${API_URL}/api/courses/instructor/${tokenId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       
@@ -171,7 +172,7 @@ const InstructorDashboard = () => {
     }
     console.log('Request body:', JSON.stringify({ ...courseData }, null, 2));
     try {
-      const response = await axios.post('http://localhost:3000/api/courses/create', courseData, {
+      const response = await axios.post(`${API_URL}/api/courses/create`, courseData, {
         headers: { Authorization: `Bearer ${token}` },
       });
       console.log('Success response:', response.data);
@@ -197,7 +198,7 @@ const InstructorDashboard = () => {
     if (window.confirm('Are you sure you want to delete this course?')) {
       setLoading(true);
       try {
-        await axios.delete(`http://localhost:3000/api/courses/${courseId}`, {
+        await axios.delete(`${API_URL}/api/courses/${courseId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         fetchCourses();
@@ -217,7 +218,7 @@ const InstructorDashboard = () => {
     setError(null);
     
     try {
-      const response = await axios.get(`http://localhost:3000/api/courses/${course.id}/modules`, {
+      const response = await axios.get(`${API_URL}/api/courses/${course.id}/modules`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       console.log('Module data received:', response.data);
