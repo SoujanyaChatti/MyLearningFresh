@@ -1,64 +1,55 @@
-Online Learning Platform Project
-Overview
-This project is an online learning platform built with a React frontend and a Node.js/Express backend, connected to a PostgreSQL database. It allows users to sign up, log in, enroll in courses, track progress, and explore course content, including modules, quizzes, and certificates. The platform includes a student dashboard with features like recommended courses, filters, and quick actions. I added extra tables to the database to support the frontend requirements, enhancing functionality.
-Project Setup
-Database Setup
+## Database Setup
+The database schema is defined in `database/schema.sql`. To initialize the PostgreSQL database:
+1. Install PostgreSQL and start the service.
+2. Create a database: `createdb learning_platform`.
+3. Apply the schema: `psql -d learning_platform -f database/schema.sql`.
 
-The database schema is in database/schema.sql.
-Steps:
-Install PostgreSQL and start it.
-Create a database: createdb learning_platform.
-Apply the schema: psql -d learning_platform -f database/schema.sql.
+## Backend Setup
+1. Navigate to `server/`.
+2. Run `npm install` to install dependencies.
+3. Ensure `.env` in the project root has `DATABASE_URL=postgres://your-username@localhost:5432/learning_platform` and a `JWT_SECRET`.
+4. Update `index.js` with `require('dotenv').config({ path: '../.env' });`.
+5. Start the server: `npx nodemon index.js`.
 
-
-Added Tables: I included additional tables (coursecontent, forumposts, quizsubmissions, ratings, uservotes) to support course content management, forum discussions, quiz tracking, course ratings, and vote tracking for the frontend.
-
-Backend Setup
-
-Location: server/
-Steps:
-Run npm install to install dependencies.
-Create a .env file in the project root with:
-DATABASE_URL=postgres://your-username@localhost:5432/learning_platform
-JWT_SECRET=your-secret-key
+## Backend Setup
+- Server runs on port 3000 (switched from 5000 due to port conflict with ControlCe).
+- Authentication:
+  - POST /api/auth/signup: Creates user with JWT token (e.g., {"name": "Test User", ...}).
+  - POST /api/auth/login: Authenticates user and returns token.
+## Troubleshooting
+- Resolved 403 by freeing port 5000 and switching to 3000.
+- Fixed "Cannot GET" by ensuring POST method in Postman.
 
 
-Update index.js to include require('dotenv').config({ path: '../.env' });.
-Start the server: npx nodemon index.js.
+## Backend Setup
+- Server runs on port 3000.
+- APIs:
+  - POST /api/auth/signup: Creates user with JWT.
+  - POST /api/auth/login: Authenticates user.
+  - POST /api/courses: Creates courses.
+  - POST /api/courses/modules: Creates modules.
+  - POST /api/courses/course-content: Adds content.
+  - POST /api/courses/quizzes: Adds quizzes.
+  - POST /api/courses/enrollments/:id/progress: Updates progress.
+## Troubleshooting
+- Resolved foreign key violations by ensuring course and module existence.
+- Fixed JSON parsing for quizzes with explicit stringification.
+- Handled duration parsing ('10m') for progress calculation with CASE statements.
 
+## API Updates
+- Added GET /api/courses/course-content/:id to retrieve content details.
 
-Server Details: Runs on port 3000 (changed from 5000 due to a conflict).
-Authentication:
-POST /api/auth/signup: Creates a user and returns a JWT token (e.g., {"name": "Test User", ...}).
-POST /api/auth/login: Authenticates a user and returns a token.
+## API Updates
+- Corrected route to GET /api/courses/modules/:id/content due to mounting under /api/courses.
 
+## API Updates
+- Enhanced CoursePlayer to list all module content.
+- Verified POST /api/courses/enrollments for course enrollment.
 
+## Database Enhancements
+I added extra tables to the database to facilitate the frontend requirements, enhancing functionality. The updated schema includes:
 
-Frontend Setup
-
-Location: client/
-Steps:
-Navigate to client/.
-Run npm install to install dependencies.
-Start the development server: npm start.
-Build for deployment: npm run build.
-
-
-Config: A config.js file in src/components defines API_URL (e.g., https://my-learning-server-ma48.onrender.com).
-Deployment: Hosted on Render as a Static Site (my-learning-client.onrender.com).
-
-Features
-
-User Management: Sign up, log in, and authentication with JWT.
-Courses: Create, enroll, and track progress.
-Dashboard: Displays enrolled courses, newest courses, top-rated courses, recommended courses, deadlines, announcements, and quick actions (e.g., view profile, take quiz).
-Filters: Filter courses by difficulty, rating, and category.
-Content: View course modules, content, and quizzes.
-Certificates: Track and manage certificates.
-Forum: Post and upvote discussions.
-Ratings: Rate courses.
-
-Database Schema
+```sql
 -- Users Table
 CREATE TABLE public.users (
     id integer NOT NULL DEFAULT nextval('public.users_id_seq'::regclass),
@@ -209,73 +200,3 @@ ALTER SEQUENCE public.quizzes_id_seq OWNED BY public.quizzes.id;
 ALTER SEQUENCE public.ratings_id_seq OWNED BY public.ratings.id;
 ALTER SEQUENCE public.users_id_seq OWNED BY public.users.id;
 ALTER SEQUENCE public.uservotes_id_seq OWNED BY public.uservotes.id;
-
-APIs
-
-Authentication:
-POST /api/auth/signup
-POST /api/auth/login
-
-
-Courses:
-POST /api/courses: Create courses.
-POST /api/courses/modules: Create modules.
-POST /api/courses/course-content: Add content.
-POST /api/courses/quizzes: Add quizzes.
-POST /api/courses/enrollments/:id/progress: Update progress.
-GET /api/courses/course-content/:id: Retrieve content.
-GET /api/courses/modules/:id/content: Get module content.
-GET /api/courses/recent: List 5 newest courses.
-GET /api/courses/top-rated: List 5 top-rated courses.
-GET /api/courses/enrollments?user_id={id}: Get enrolled courses.
-GET /api/courses/recommend-by-interest: Get recommended courses.
-
-
-Submissions: POST /api/submissions (for quiz submissions).
-Certificates: POST /api/certificates (for certificate issuance).
-
-Development History
-
-Initial Setup: Set up PostgreSQL database and basic Express server.
-Backend Development:
-Resolved port 5000 conflict by switching to 3000.
-Fixed "Cannot GET" errors by using POST methods correctly.
-Handled foreign key violations and JSON parsing for quizzes.
-Added duration parsing for progress with CASE statements.
-
-
-Frontend Development:
-Built the student dashboard with React, showing enrolled, newest, and top-rated courses.
-Added filters and recommended courses based on enrollment.
-Fixed 404 errors on API calls by correcting API_URL interpolation (resolved dual config.js files issue).
-
-
-Database Enhancements: I added tables (coursecontent, forumposts, quizsubmissions, ratings, uservotes) to support frontend features like content management, forums, quiz tracking, ratings, and voting.
-Deployment:
-Deployed backend on Render (my-learning-server-ma48.onrender.com).
-Deployed frontend on Render (my-learning-client.onrender.com).
-Resolved refresh 404s by adding a rewrite rule to serve index.html for all routes.
-
-
-Troubleshooting:
-Fixed 403 errors by ensuring port availability.
-Addressed client-side routing issues with Render’s static site configuration.
-
-
-
-Deployment
-
-Backend: Deployed on Render with environment variables (DATABASE_URL, JWT_SECRET).
-Frontend: Deployed on Render with a rewrite rule (/* to /index.html) to handle SPA routing.
-Access: Visit my-learning-client.onrender.com after logging in.
-
-Future Improvements
-
-Add user-facing error messages for 404s or API failures.
-Enhance security with specific CORS origins.
-Implement certificate generation and download.
-
-Contributors
-
-Developed by you with guidance from our collaboration!
-
