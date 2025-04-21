@@ -74,7 +74,7 @@ const StudentDashboard = () => {
 
       console.log('Fetching newest courses');
       axios
-        .get('${API_URL}/api/courses/recent', {
+        .get(`${API_URL}/api/courses/recent`, {
           headers: { Authorization: `Bearer ${token}` },
         })
         .then((res) => {
@@ -98,7 +98,7 @@ const StudentDashboard = () => {
 
       console.log('Fetching top-rated courses');
       axios
-        .get('${API_URL}/api/courses/top-rated', {
+        .get(`${API_URL}/api/courses/top-rated`, {
           headers: { Authorization: `Bearer ${token}` },
         })
         .then((res) => {
