@@ -201,6 +201,44 @@ ALTER SEQUENCE public.ratings_id_seq OWNED BY public.ratings.id;
 ALTER SEQUENCE public.users_id_seq OWNED BY public.users.id;
 ALTER SEQUENCE public.uservotes_id_seq OWNED BY public.uservotes.id;
 ```
+## Setup Instructions
+
+### Local Setup
+To run the project locally, follow these steps:
+
+1. **Install Dependencies**:
+   - Ensure Node.js and PostgreSQL are installed on your machine.
+   - Install Git to clone the repository.
+
+2. **Database Setup**:
+   - The database schema is defined in `database/schema.sql`.
+   - Initialize PostgreSQL:
+     1. Start the PostgreSQL service.
+     2. Create a database: `createdb learning_platform`.
+     3. Apply the schema: `psql -d learning_platform -f database/schema.sql`.
+   - Update the `DATABASE_URL` in the `.env` file to use localhost (e.g., `DATABASE_URL=postgres://your-username@localhost:5432/learning_platform`), replacing `your-username` with your PostgreSQL username.
+
+3. **Backend Setup**:
+   - Navigate to `server/`.
+   - Run `npm install` to install dependencies.
+   - Create or update a `.env` file in the project root with:
+     - `DATABASE_URL=postgres://your-username@localhost:5432/learning_platform`
+     - `JWT_SECRET=your-secret-key` (generate a secure random string).
+   - Update `index.js` with `require('dotenv').config({ path: '../.env' });`.
+   - Start the server: `npx nodemon index.js`.
+   - Note: The server runs on port 3000 (changed from 5000 due to a conflict).
+
+4. **Frontend Setup**:
+   - Navigate to `client/`.
+   - Run `npm install` to install dependencies.
+   - Update the `API_URL` in `src/components/config.js` to `http://localhost:3000` to point to the local backend.
+   - Start the development server: `npm start`.
+   - Build for deployment (optional): `npm run build`.
+
+5. **Verification**:
+   - Open `http://localhost:3000` in your browser to test backend APIs (e.g., via Postman).
+   - Open `http://localhost:3000` (or the port set by `npm start`, typically 3000) for the frontend.
+   - Ensure the frontend communicates with the local backend by testing login or course enrollment.
 
 ## Development History
 - **Initial Setup**: Set up PostgreSQL database and basic Express server.
