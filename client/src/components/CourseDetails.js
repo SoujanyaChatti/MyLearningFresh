@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
+import { API_URL } from './config';
 
 const CourseDetails = () => {
   const { id } = useParams();
@@ -20,7 +21,7 @@ const CourseDetails = () => {
     if (token && id) {
       console.log(`Fetching course for id: ${id}, userId: ${userId}, token: ${token.substring(0, 10)}...`);
       setLoading(true);
-      axios.get(`http://localhost:3000/api/courses/${id}`, {
+      axios.get(`${API_URL}/api/courses/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       })
         .then(res => {
@@ -44,7 +45,7 @@ const CourseDetails = () => {
         .finally(() => setLoading(false));
 
       console.log(`Checking enrollment for userId: ${userId}, courseId: ${id}`);
-      axios.get(`http://localhost:3000/api/courses/enrollments?user_id=${userId}`, {
+      axios.get(`${API_URL}/api/courses/enrollments?user_id=${userId}`, {
         headers: { Authorization: `Bearer ${token}` }
       })
         .then(res => {
@@ -83,7 +84,7 @@ const CourseDetails = () => {
     }
     setLoading(true);
     setError(null);
-    axios.post(`http://localhost:3000/api/courses/enrollments`, {
+    axios.post(`${API_URL}/api/courses/enrollments`, {
       course_id: parseInt(id),
       user_id: userId
     }, {
