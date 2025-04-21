@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
 import './CourseContent.css'; // Custom CSS file
+import { API_URL } from './config';
 
 const CourseContent = () => {
   const { id: courseId } = useParams();
@@ -30,7 +31,7 @@ const CourseContent = () => {
     (moduleId) => {
       console.log(`Fetching contents for moduleId: ${moduleId}`);
       return axios
-        .get(`http://localhost:3000/api/modules/${moduleId}/contents`, {
+        .get(`${API_URL}/api/modules/${moduleId}/contents`, {
           headers: { Authorization: `Bearer ${token}` },
         })
         .then((res) => {
@@ -51,7 +52,7 @@ const CourseContent = () => {
   useEffect(() => {
     if (showForums && courseId && token) {
       axios
-        .get(`http://localhost:3000/api/courses/${courseId}/forum-posts`, {
+        .get(`${API_URL}/api/courses/${courseId}/forum-posts`, {
           headers: { Authorization: `Bearer ${token}` },
         })
         .then((res) => {
@@ -69,7 +70,7 @@ const CourseContent = () => {
   useEffect(() => {
     if (token && courseId) {
       axios
-        .get(`http://localhost:3000/api/courses/enrollments?user_id=${userId}`, {
+        .get(`${API_URL}/api/courses/enrollments?user_id=${userId}`, {
           headers: { Authorization: `Bearer ${token}` },
         })
         .then((res) => {
@@ -88,7 +89,7 @@ const CourseContent = () => {
         });
 
       axios
-        .get(`http://localhost:3000/api/courses/${courseId}/modules`, {
+        .get(`${API_URL}/api/courses/${courseId}/modules`, {
           headers: { Authorization: `Bearer ${token}` },
         })
         .then((res) => {
@@ -124,7 +125,7 @@ const CourseContent = () => {
   useEffect(() => {
     if (courseId && token) {
       axios
-        .get(`http://localhost:3000/api/courses/${courseId}/rating`, {
+        .get(`${API_URL}/api/courses/${courseId}/rating`, {
           headers: { Authorization: `Bearer ${token}` },
         })
         .then((res) => {
@@ -149,7 +150,7 @@ const CourseContent = () => {
       const content = contents[expandedModule].find((c) => c.id === selectedContent);
       if (content && content.type.toLowerCase() === 'quiz') {
         axios
-          .get(`http://localhost:3000/api/submissions/count`, {
+          .get(`${API_URL}/api/submissions/count`, {
             headers: { Authorization: `Bearer ${token}` },
             params: { enrollmentId, quizId: content.id },
           })
@@ -163,7 +164,7 @@ const CourseContent = () => {
           });
 
         axios
-          .get(`http://localhost:3000/api/submissions/max-score`, {
+          .get(`${API_URL}/api/submissions/max-score`, {
             headers: { Authorization: `Bearer ${token}` },
             params: { quizId: content.id },
           })
@@ -187,7 +188,7 @@ const CourseContent = () => {
     if (selectedContent && enrollmentId) {
       axios
         .post(
-          `http://localhost:3000/api/courses/enrollments/${enrollmentId}/progress`,
+          `${API_URL}/api/courses/enrollments/${enrollmentId}/progress`,
           {
             moduleId: expandedModule,
             contentId: selectedContent,
@@ -247,7 +248,7 @@ const CourseContent = () => {
 
     axios
       .post(
-        `http://localhost:3000/api/submissions`,
+        `${API_URL}/api/submissions`,
         {
           enrollmentId,
           quizId: content.id,
@@ -293,7 +294,7 @@ const CourseContent = () => {
     setQuizScore(null);
     if (content.type.toLowerCase() === 'quiz' && enrollmentId) {
       axios
-        .get(`http://localhost:3000/api/submissions/count`, {
+        .get(`${API_URL}/api/submissions/count`, {
           headers: { Authorization: `Bearer ${token}` },
           params: { enrollmentId, quizId: content.id },
         })
@@ -307,7 +308,7 @@ const CourseContent = () => {
         });
 
       axios
-        .get(`http://localhost:3000/api/submissions/max-score`, {
+        .get(`${API_URL}/api/submissions/max-score`, {
           headers: { Authorization: `Bearer ${token}` },
           params: { quizId: content.id },
         })
@@ -327,7 +328,7 @@ const CourseContent = () => {
     if (rating > 0 && rating <= 5 && enrollmentId) {
       axios
         .post(
-          `http://localhost:3000/api/courses/${courseId}/rate`,
+          `${API_URL}/api/courses/${courseId}/rate`,
           {
             userId,
             rating,
@@ -364,7 +365,7 @@ const CourseContent = () => {
 
     axios
       .post(
-        `http://localhost:3000/api/courses/${courseId}/forum-posts`,
+        `${API_URL}/api/courses/${courseId}/forum-posts`,
         {
           userId,
           content: newPostContent,
@@ -393,7 +394,7 @@ const CourseContent = () => {
 
     axios
       .patch(
-        `http://localhost:3000/api/courses/${courseId}/forum-posts/${postId}/upvote`,
+        `${API_URL}/api/courses/${courseId}/forum-posts/${postId}/upvote`,
         {},
         {
           headers: { Authorization: `Bearer ${token}` },
