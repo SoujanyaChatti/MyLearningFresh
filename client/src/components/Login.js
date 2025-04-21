@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
+import { API_URL } from './config'; // Import the config
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -21,13 +22,13 @@ const Login = () => {
       return;
     }
     try {
-      const response = await axios.post('http://localhost:3000/api/auth/login', { email, password, userType });
+      const response = await axios.post(`${API_URL}/api/auth/login`, { email, password, userType });
       localStorage.setItem('token', response.data.token);
       localStorage.setItem('userType', userType); // Store user type
       const redirectPath = userType === 'student' ? '/student' : userType === 'instructor' ? '/instructor' : '/admin';
       navigate(redirectPath);
     } catch (err) {
-      setError('Login failed. Check your credentials.');
+      setError(err.response?.data?.error || 'Login failed. Check your credentials or server connection.');
     }
   };
 
