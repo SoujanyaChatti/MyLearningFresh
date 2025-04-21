@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
 import { Link } from 'react-router-dom';
-
+import { API_URL } from './config'; // Import the config
 const Profile = () => {
   const [enrollments, setEnrollments] = useState([]);
   const [error, setError] = useState(null);
@@ -13,7 +13,7 @@ const Profile = () => {
   useEffect(() => {
     if (token) {
       console.log(`Fetching enrollments for userId: ${userId}, token: ${token.substring(0, 10)}...`);
-      axios.get(`http://localhost:3000/api/courses/enrollments?user_id=${userId}`, {
+      axios.get(`${API_URL}/api/courses/enrollments?user_id=${userId}`, {
         headers: { Authorization: `Bearer ${token}` }
       })
         .then(res => {
@@ -44,7 +44,7 @@ const Profile = () => {
   const handleViewCertificate = (courseId) => {
     console.log('Fetching certificate for:', { userId, courseId });
     axios
-      .get(`http://localhost:3000/api/certificates?user_id=${userId}&course_id=${courseId}`, {
+      .get(`${API_URL}/api/certificates?user_id=${userId}&course_id=${courseId}`, {
         headers: { Authorization: `Bearer ${token}` },
         responseType: 'blob',
       })
