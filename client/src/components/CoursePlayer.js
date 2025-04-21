@@ -1,16 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { API_URL } from './config'; // Import the config
 
 const CoursePlayer = ({ courseId }) => {
   const [contents, setContents] = useState([]);
   useEffect(() => {
     const token = localStorage.getItem('token');
-    axios.get(`http://localhost:3000/api/courses/${courseId}/modules`, {
+    axios.get(`${API_URL}/api/courses/${courseId}/modules`, {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(res => {
         if (res.data.length > 0) {
-          return axios.get(`http://localhost:3000/api/courses/modules/${res.data[0].id}/content`, {
+          return axios.get(`${API_URL}/api/courses/modules/${res.data[0].id}/content`, {
             headers: { Authorization: `Bearer ${token}` }
           });
         }
@@ -20,7 +21,7 @@ const CoursePlayer = ({ courseId }) => {
   }, [courseId]);
   const updateProgress = (contentId, moduleId) => {
     const token = localStorage.getItem('token');
-    axios.post(`http://localhost:3000/api/courses/enrollments/1/progress`, {
+    axios.post(`${API_URL}/api/courses/enrollments/1/progress`, {
       moduleId,
       contentId
     }, { headers: { Authorization: `Bearer ${token}` } })
