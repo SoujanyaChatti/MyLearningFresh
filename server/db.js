@@ -1,8 +1,8 @@
 const { Pool } = require('pg');
-require('dotenv').config({ path: '../.env' });
-
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false // Required for Render PostgreSQL
+  }
 });
-
-module.exports = { pool }; // Original export using destructuring
+module.exports = { pool };
