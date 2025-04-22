@@ -701,4 +701,18 @@ router.get('/instructor/:id', rbac(['instructor']), async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch courses', message: err.message });
   }
 });
+
+
+router.delete('/:id', rbac(['instructor']), async (req, res) => {
+  try {
+    const result = await pool.query('DELETE FROM public.courses WHERE id = $1 AND instructor_id = $2', [req.params.id, req.user.id]);
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: 'Course not found or not owned by you' });
+    }
+    res.json({ message: 'Course deleted successfully' });
+  } catch (err) {
+    console.error('Delete error:', err.stack); // Enhanced logging
+    res.status(500).json({ error: 'Internal server error', details: err.message });
+  }
+});
 module.exports = router;
