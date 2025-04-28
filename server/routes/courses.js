@@ -95,7 +95,23 @@ router.post('/quizzes', rbac(['instructor']), async (req, res) => {
     res.status(500).json({ error: 'Server error' });
   }
 });
-
+router.put('/:moduleId/quizzes', rbac(['instructor']), async (req, res) => {
+  const { moduleId } = req.params;
+  const { questions, passing_score } = req.body;
+  try {
+    const result = await pool.query(
+      'UPDATE Quizzes SET questions = $1, passing_score = $2 WHERE module_id = $3 RETURNING *',
+      [JSON.stringify(questions), passing_score, moduleId]
+    );
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: 'Quiz not found for this module' });
+    }
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error('Update quiz error:', err.stack);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
 // Update Progress
 router.post('/enrollments/:id/progress', rbac(['student']), async (req, res) => {
   const { id } = req.params;
