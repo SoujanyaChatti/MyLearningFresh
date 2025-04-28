@@ -28,23 +28,21 @@ const CourseContent = () => {
   const [newPostContent, setNewPostContent] = useState('');
 
   const fetchContents = useCallback(
-    (moduleId) => {
+    async (moduleId) => {
       console.log(`Fetching contents for moduleId: ${moduleId}`);
-      return axios
-        .get(`${API_URL}/api/modules/${moduleId}/contents`, {
+      try {
+        const res = await axios.get(`${API_URL}/api/modules/${moduleId}/contents`, {
           headers: { Authorization: `Bearer ${token}` },
-        })
-        .then((res) => {
-          console.log('Contents response (raw):', res.data);
-          const contentData = res.data;
-          setContents((prev) => ({ ...prev, [moduleId]: contentData }));
-          return contentData;
-        })
-        .catch((err) => {
-          console.error('Content fetch error:', err.response ? err.response.data : err.message);
-          setError('Failed to load content.');
-          return [];
         });
+        console.log('Contents response (raw):', res.data);
+        const contentData = res.data;
+        setContents((prev) => ({ ...prev, [moduleId]: contentData }));
+        return contentData;
+      } catch (err) {
+        console.error('Content fetch error:', err.response ? err.response.data : err.message);
+        setError('Failed to load content for this module.');
+        return [];
+      }
     },
     [token]
   );
@@ -69,6 +67,7 @@ const CourseContent = () => {
 
   useEffect(() => {
     if (token && courseId) {
+      // Fetch enrollments
       axios
         .get(`${API_URL}/api/courses/enrollments?user_id=${userId}`, {
           headers: { Authorization: `Bearer ${token}` },
@@ -80,7 +79,7 @@ const CourseContent = () => {
             setEnrollmentId(enrollment.id);
             setProgress(enrollment.progress || 0);
           } else {
-            setError('No enrollment found for this course.');
+            setError('No enrollment found for this course. Please enroll first.');
           }
         })
         .catch((err) => {
@@ -88,29 +87,25 @@ const CourseContent = () => {
           setError('Failed to load enrollment data.');
         });
 
+      // Fetch modules
       axios
         .get(`${API_URL}/api/courses/${courseId}/modules`, {
           headers: { Authorization: `Bearer ${token}` },
         })
-        .then((res) => {
+        .then(async (res) => {
           console.log('Modules response:', res.data);
           const modulesData = res.data;
           setModules(modulesData);
           if (modulesData.length > 0) {
             const firstModuleId = modulesData[0].id;
             setExpandedModule(firstModuleId);
-            fetchContents(firstModuleId).then(contentData => {
-              if (!selectedContent && contentData.length > 0) {
-                const firstNonQuizContent = contentData
-                  .filter((c) => c.type.toLowerCase() !== 'quiz')
-                  .sort((a, b) => a.order_index - b.order_index)[0];
-                if (firstNonQuizContent) {
-                  setSelectedContent(firstNonQuizContent.id);
-                } else if (contentData[0]) {
-                  setSelectedContent(contentData[0].id);
-                }
-              }
-            });
+            const contentData = await fetchContents(firstModuleId);
+            if (contentData.length > 0) {
+              const firstNonQuizContent = contentData
+                .filter((c) => c.type.toLowerCase() !== 'quiz')
+                .sort((a, b) => a.order_index - b.order_index)[0];
+              setSelectedContent(firstNonQuizContent ? firstNonQuizContent.id : contentData[0].id);
+            }
           } else {
             setError('No modules found for this course.');
           }
@@ -119,11 +114,8 @@ const CourseContent = () => {
           console.error('Modules fetch error:', err.response ? err.response.data : err.message);
           setError('Failed to load modules.');
         });
-    }
-  }, [token, userId, courseId, fetchContents, selectedContent]);
 
-  useEffect(() => {
-    if (courseId && token) {
+      // Fetch course rating
       axios
         .get(`${API_URL}/api/courses/${courseId}/rating`, {
           headers: { Authorization: `Bearer ${token}` },
@@ -143,7 +135,7 @@ const CourseContent = () => {
           setCourseRating(0);
         });
     }
-  }, [courseId, token]);
+  }, [token, userId, courseId, fetchContents]);
 
   useEffect(() => {
     if (enrollmentId && selectedContent && expandedModule && contents[expandedModule]) {
@@ -275,14 +267,22 @@ const CourseContent = () => {
       });
   };
 
-  const handleModuleClick = (e, moduleId) => {
+  const handleModuleClick = async (e, moduleId) => {
     e.preventDefault();
     console.log("Module clicked:", moduleId);
     const isExpanding = expandedModule !== moduleId;
     setExpandedModule(isExpanding ? moduleId : null);
     setShowForums(false);
+    setQuizScore(null);
+    setSelectedContent(null); // Reset selected content when changing modules
     if (isExpanding) {
-      fetchContents(moduleId);
+      const contentData = await fetchContents(moduleId);
+      if (contentData.length > 0) {
+        const firstNonQuizContent = contentData
+          .filter((c) => c.type.toLowerCase() !== 'quiz')
+          .sort((a, b) => a.order_index - b.order_index)[0];
+        setSelectedContent(firstNonQuizContent ? firstNonQuizContent.id : contentData[0].id);
+      }
     }
   };
 
@@ -292,6 +292,7 @@ const CourseContent = () => {
     setSelectedContent(content.id);
     setShowForums(false);
     setQuizScore(null);
+    setQuizAnswers({}); // Reset quiz answers when switching content
     if (content.type.toLowerCase() === 'quiz' && enrollmentId) {
       axios
         .get(`${API_URL}/api/submissions/count`, {
@@ -462,8 +463,8 @@ const CourseContent = () => {
       case 'video':
         console.log('Rendering video content:', { url: content.url, type: content.type });
         if (content.url) {
-          const isYouTubeUrl = content.url.includes('youtube.com') || 
-                              content.url.includes('youtu.be') || 
+          const isYouTubeUrl = content.url.includes('youtube.com') ||
+                              content.url.includes('youtu.be') ||
                               content.url.includes('youtube-nocookie.com');
           if (isYouTubeUrl) {
             let videoId = '';
@@ -628,10 +629,10 @@ const CourseContent = () => {
           <li className="navbar-item">
             <Link to="/student">Dashboard</Link>
           </li>
+          
           <li className="navbar-item">
             <Link to="/profile">Profile</Link>
           </li>
-          
         </ul>
       </nav>
 
@@ -648,7 +649,7 @@ const CourseContent = () => {
                 >
                   {module.title} {expandedModule === module.id ? '▼' : '▶'}
                 </h5>
-                {expandedModule === module.id && contents[module.id] && (
+                {expandedModule === module.id && contents[module.id] && contents[module.id].length > 0 ? (
                   <ul className="content-list">
                     {contents[module.id].map((content) => (
                       <li
@@ -656,16 +657,25 @@ const CourseContent = () => {
                         className={`content-item ${selectedContent === content.id ? 'selected' : ''}`}
                         onClick={(e) => handleContentClick(e, content)}
                       >
-                        {content.type}: {content.url.split('/').pop() || 'Unnamed Content'}
+                        {content.type}: {content.url ? content.url.split('/').pop() : 'Unnamed Content'}
                       </li>
                     ))}
                   </ul>
+                ) : (
+                  expandedModule === module.id && <p className="text-center">No content available.</p>
                 )}
               </div>
             ))
           )}
-          <button className="forums-button" onClick={() => setShowForums(!showForums)}>
-            <Link to="#">Forums</Link>
+          <button
+            className="forums-button"
+            onClick={() => {
+              setShowForums(!showForums);
+              setSelectedContent(null); // Reset content selection when toggling forums
+              setQuizScore(null);
+            }}
+          >
+            {showForums ? 'Hide Forums' : 'Show Forums'}
           </button>
           <div className="rating-section mt-3">
             <h5>Rate this Course</h5>
