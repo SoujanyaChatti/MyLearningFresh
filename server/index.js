@@ -7,7 +7,13 @@ const bcrypt = require('bcrypt');
 const cors = require('cors');
 const app = express();
 
-app.use(cors({ origin: '*' }));
+app.use(cors({
+  origin: 'https://my-learning-client.onrender.com',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
+}));
+
 app.use(express.json());
 
 const { pool } = require('./db');
